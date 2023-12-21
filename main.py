@@ -1,0 +1,61 @@
+import sys
+import random
+from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QPushButton, QLineEdit, QVBoxLayout, QWidget
+
+class DiceProbabilityApp(QMainWindow):
+    def __init__(self):
+        super().__init__()
+
+        self.setWindowTitle('Вероятность выпадения суммы чисел на шестигранных кубиках')
+        self.setGeometry(100, 100, 400, 200)
+
+        self.label = QLabel('Введите количество кубиков:')
+        self.input_box = QLineEdit()
+        self.submit_button = QPushButton('Посчитать вероятность')
+
+        self.result_label = QLabel('')
+
+        layout = QVBoxLayout()
+        layout.addWidget(self.label)
+        layout.addWidget(self.input_box)
+        layout.addWidget(self.submit_button)
+        layout.addWidget(self.result_label)
+
+        central_widget = QWidget()
+        central_widget.setLayout(layout)
+        self.setCentralWidget(central_widget)
+
+        self.submit_button.clicked.connect(self.calculate_probability)
+
+    def calculate_probability(self):
+        num_dice = self.input_box.text()
+        try:
+            num_dice = int(num_dice)
+            if num_dice > 0:
+                total_rolls = 1000000
+                counts = [0] * (6 * num_dice + 1)
+
+                for _ in range(total_rolls):
+                    roll_sum = sum(random.randint(1, 6) for _ in range(num_dice))
+                    counts[roll_sum] += 1
+
+                probabilities = [count / total_rolls for count in counts]
+
+                result_text = 'Вероятности выпадения сумм чисел:\n'
+                for i in range(num_dice, 6 * num_dice + 1):
+                    result_text += f'{i}: {probabilities[i]:.6f}\n'
+
+                self.result_label.setText(result_text)
+            else:
+                self.result_label.setText('Введите положительное число кубиков')
+        except ValueError:
+            self.result_label.setText('Введите корректное число кубиков')
+
+def run_app():
+    app = QApplication(sys.argv)
+    window = DiceProbabilityApp()
+    window.show()
+    sys.exit(app.exec())
+
+if __name__ == "__main__":
+    run_app()
